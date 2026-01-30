@@ -2,8 +2,15 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Strength & Scripture">
+    <meta name="theme-color" content="#0A0E27">
     <title>Strength & Scripture Tracker</title>
+    <link rel="manifest" href="manifest.webmanifest">
+    <meta name="description" content="Strength & Scripture — a personal tracker for workouts and Bible reading.">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -131,7 +138,7 @@
             left: 0;
             width: 4px;
             height: 100%;
-            background: linear-gradient(to bottom, var(--primary), var(--secondary));
+            background: currentColor;
         }
 
         .stat-card:hover {
@@ -274,6 +281,47 @@
             border-radius: 8px;
             padding: 1.5rem;
             transition: all 0.3s;
+        }
+
+        .exercise-item.completed {
+            opacity: 0.6;
+            max-height: 80px;
+            overflow: hidden;
+            padding: 1rem 1.5rem;
+        }
+
+        .exercise-item.completed .exercise-inputs,
+        .exercise-item.completed .rest-badge,
+        .exercise-item.completed .suggestion {
+            display: none;
+        }
+
+        .exercise-checkbox {
+            appearance: none;
+            width: 24px;
+            height: 24px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.3s;
+            flex-shrink: 0;
+        }
+
+        .exercise-checkbox:checked {
+            background: var(--success);
+            border-color: var(--success);
+        }
+
+        .exercise-checkbox:checked::after {
+            content: '✓';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: var(--dark);
+            font-size: 16px;
+            font-weight: bold;
         }
 
         .exercise-item:hover {
@@ -478,67 +526,27 @@
             box-shadow: 0 0 0 2px rgba(0, 217, 255, 0.2);
         }
 
-        .calendar-day.scheduled {
-            background: rgba(0, 217, 255, 0.05);
-            border-color: rgba(0, 217, 255, 0.2);
+        .activity-pill {
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 0.35rem 0.6rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            white-space: nowrap;
         }
 
-        .calendar-day.scheduled::before {
-            content: '';
-            position: absolute;
-            top: 4px;
-            right: 4px;
-            width: 4px;
-            height: 4px;
-            background: var(--secondary);
-            border-radius: 50%;
-            opacity: 0.5;
+        .workout-pill {
+            background: rgba(255, 77, 0, 0.15);
+            color: var(--primary);
+            border: 1px solid rgba(255, 77, 0, 0.3);
         }
 
-        .calendar-day.workout {
-            background: linear-gradient(135deg, rgba(255, 77, 0, 0.2), rgba(0, 217, 255, 0.2));
-            border-color: var(--primary);
-        }
-
-        .calendar-day.workout::after {
-            content: '💪';
-            position: absolute;
-            bottom: 2px;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 0.7rem;
-        }
-
-        .calendar-day.reading::before {
-            content: '📖';
-            position: absolute;
-            top: 2px;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 0.7rem;
-        }
-
-        .calendar-day.both {
-            background: linear-gradient(135deg, rgba(255, 77, 0, 0.3), rgba(0, 217, 255, 0.3));
-            border-color: var(--success);
-        }
-
-        .calendar-day.both::after {
-            content: '💪';
-            position: absolute;
-            bottom: 2px;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 0.7rem;
-        }
-
-        .calendar-day.both::before {
-            content: '📖';
-            position: absolute;
-            top: 2px;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 0.7rem;
+        .reading-pill {
+            background: rgba(0, 217, 255, 0.15);
+            color: var(--secondary);
+            border: 1px solid rgba(0, 217, 255, 0.3);
         }
 
         .chart-container {
@@ -570,21 +578,180 @@
         }
 
         @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
             h1 {
-                font-size: 3rem;
+                font-size: 2.5rem;
+            }
+
+            .subtitle {
+                font-size: 0.9rem;
             }
 
             .stats-bar {
-                flex-direction: column;
+                gap: 0.75rem;
+            }
+
+            .stat-card {
+                min-width: unset;
+                padding: 1rem 1.25rem;
+            }
+
+            .stat-label {
+                font-size: 0.7rem;
+            }
+
+            .stat-value {
+                font-size: 1.8rem;
             }
 
             .workout-selector {
                 flex-direction: column;
             }
 
-            .exercise-inputs {
-                grid-template-columns: repeat(2, 1fr);
+            .workout-type-btn {
+                min-width: unset;
+                padding: 1.5rem;
+                font-size: 1.5rem;
             }
+
+            .exercise-inputs {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                grid-template-rows: auto auto;
+                gap: 0.75rem;
+            }
+
+            .input-group {
+                display: grid;
+                grid-template-columns: auto 1fr;
+                gap: 0.5rem;
+                align-items: center;
+            }
+
+            .input-group:nth-child(1),
+            .input-group:nth-child(2) {
+                /* Sets and Reps on first row */
+            }
+
+            .input-group:nth-child(3) {
+                /* Weight spans full width on second row */
+                grid-column: 1 / -1;
+            }
+
+            .input-label {
+                font-size: 0.8rem;
+                margin: 0;
+                white-space: nowrap;
+            }
+
+            input[type="number"] {
+                font-size: 1rem;
+                padding: 0.75rem;
+                width: 100%;
+                /* Prevent zoom on iOS */
+                touch-action: manipulation;
+            }
+
+            .tabs {
+                gap: 0.5rem;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            .tab {
+                font-size: 1.2rem;
+                padding: 0.75rem 1rem;
+                white-space: nowrap;
+            }
+
+            .calendar {
+                grid-template-columns: 1fr;
+                gap: 0.75rem;
+            }
+
+            .calendar-day {
+                aspect-ratio: unset;
+                min-height: unset;
+                padding: 1rem;
+                display: flex;
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .calendar-day .day-name {
+                font-size: 0.75rem;
+                text-align: left;
+            }
+
+            .calendar-day .day-number {
+                font-size: 1.3rem;
+                margin: 0;
+                text-align: left;
+            }
+
+            .mode-toggle {
+                padding: 0.6rem 1rem;
+                font-size: 0.85rem;
+            }
+
+            input[type="number"] {
+                font-size: 1rem;
+                padding: 0.75rem;
+                /* Prevent zoom on iOS */
+                touch-action: manipulation;
+            }
+
+            .complete-btn {
+                padding: 1.25rem 2rem;
+                font-size: 1.3rem;
+                /* Better touch target */
+                min-height: 56px;
+            }
+
+            .exercise-item {
+                padding: 1.25rem;
+            }
+
+            .exercise-name {
+                font-size: 1.3rem;
+            }
+
+            .chart-container {
+                padding: 1.5rem;
+            }
+
+            .chart-title {
+                font-size: 1.5rem;
+            }
+
+            /* Make today's reading more readable on mobile */
+            #todayReading {
+                font-size: 1rem;
+                line-height: 1.6;
+            }
+
+            /* Better touch targets for workout/reading buttons */
+            .workout-type-btn,
+            .complete-btn,
+            #completeReading {
+                -webkit-tap-highlight-color: rgba(255, 77, 0, 0.2);
+            }
+        }
+
+        /* Prevent text size adjustment on orientation change */
+        html {
+            -webkit-text-size-adjust: 100%;
+            -moz-text-size-adjust: 100%;
+            -ms-text-size-adjust: 100%;
+            text-size-adjust: 100%;
+        }
+
+        /* Better touch scrolling */
+        .view {
+            -webkit-overflow-scrolling: touch;
         }
     </style>
 </head>
@@ -597,35 +764,31 @@
 
         <div style="margin-bottom: 3rem;">
             <div style="display: flex; align-items: center; gap: 1.5rem; margin-bottom: 1.5rem;">
-                <div style="font-size: 3rem; line-height: 1;">💪</div>
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="var(--primary)">
+                    <path d="M20.57 14.86L22 13.43L20.57 12L17 15.57L8.43 7L12 3.43L10.57 2L9.14 3.43L7.71 2L5.57 4.14L4.14 2.71L2.71 4.14L4.14 5.57L2 7.71L3.43 9.14L2 10.57L3.43 12L7 8.43L15.57 17L12 20.57L13.43 22L14.86 20.57L16.29 22L18.43 19.86L19.86 21.29L21.29 19.86L19.86 18.43L22 16.29L20.57 14.86Z" />
+                </svg>
                 <div class="stats-bar" style="flex: 1; margin: 0;">
-                    <div class="stat-card">
+                    <div class="stat-card" style="border-left-color: var(--primary);">
                         <div class="stat-label">This Week</div>
                         <div class="stat-value success" id="weekWorkouts">0/3</div>
                     </div>
-                    <div class="stat-card">
+                    <div class="stat-card" style="border-left-color: var(--primary);">
                         <div class="stat-label">Total Workouts</div>
                         <div class="stat-value" id="totalWorkouts">0</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-label">Workout Weeks</div>
-                        <div class="stat-value" id="workoutWeeks">0</div>
                     </div>
                 </div>
             </div>
             
             <div style="display: flex; align-items: center; gap: 1.5rem;">
-                <div style="font-size: 3rem; line-height: 1;">📖</div>
+                <svg width="48" height="48" viewBox="0 -960 960 960" fill="var(--secondary)">
+                    <path d="M440-278v-394q-41-24-87-36t-93-12q-36 0-71.5 7T120-692v396q35-12 69.5-18t70.5-6q47 0 91.5 10.5T440-278Zm40 118q-48-38-104-59t-116-21q-42 0-82.5 11T100-198q-21 11-40.5-1T40-234v-482q0-11 5.5-21T62-752q46-24 96-36t102-12q74 0 126 17t112 52q11 6 16.5 14t5.5 21v418q44-21 88.5-31.5T700-320q36 0 70.5 6t69.5 18v-481q15 5 29.5 11t28.5 14q11 5 16.5 15t5.5 21v482q0 23-19.5 35t-40.5 1q-37-20-77.5-31T700-240q-60 0-116 21t-104 59Zm140-240v-440l120-40v440l-120 40Zm-340-99Z"/>
+                </svg>
                 <div class="stats-bar" style="flex: 1; margin: 0;">
-                    <div class="stat-card">
+                    <div class="stat-card" style="border-left-color: var(--secondary);">
                         <div class="stat-label">This Week</div>
                         <div class="stat-value success" id="weekReadings">0/5</div>
                     </div>
-                    <div class="stat-card">
-                        <div class="stat-label">Reading Weeks</div>
-                        <div class="stat-value" id="readingWeeks">0</div>
-                    </div>
-                    <div class="stat-card">
+                    <div class="stat-card" style="border-left-color: var(--secondary);">
                         <div class="stat-label">Overall Progress</div>
                         <div class="stat-value" id="bibleProgress">0%</div>
                     </div>
@@ -718,7 +881,29 @@
     </div>
 
     <script>
-        // Complete Bible Reading Plan Data - 1 Year, 5 Days/Week
+        
+  // ---- Storage adapter (localStorage fallback) ----
+  // Your app calls window.storage.get/set. GitHub Pages doesn't provide that by default,
+  // so we create a compatible version backed by localStorage.
+  if (!window.storage) {
+    window.storage = {
+      async get(key) {
+        const value = localStorage.getItem(key);
+        // Your existing code expects an object like { value: "..." } or null
+        return value === null ? null : { value };
+      },
+      async set(key, value) {
+        localStorage.setItem(key, value);
+        return true;
+      },
+      async remove(key) {
+        localStorage.removeItem(key);
+        return true;
+      }
+    };
+  }
+  // -----------------------------------------------
+// Complete Bible Reading Plan Data - 1 Year, 5 Days/Week
         const bibleReadingPlan = {
             // Mon/Wed/Fri stream - 156 days total, 6-7 chapters/day
             // Old Testament Chronological → Matthew → Acts → Revelation
@@ -1223,9 +1408,12 @@
             const exercises = workoutPrograms[type];
             const list = document.getElementById('exerciseList');
             list.innerHTML = exercises.map((ex, idx) => `
-                <div class="exercise-item">
+                <div class="exercise-item" id="exercise-${idx}">
                     <div class="exercise-header">
-                        <div class="exercise-name">${ex.name}</div>
+                        <div style="display: flex; align-items: center; gap: 1rem;">
+                            <input type="checkbox" class="exercise-checkbox" id="check-${idx}" onchange="toggleExercise(${idx})">
+                            <div class="exercise-name">${ex.name}</div>
+                        </div>
                         <div class="rest-badge">Rest: ${ex.rest}</div>
                     </div>
                     <div class="exercise-inputs">
@@ -1271,6 +1459,18 @@
             }
 
             document.getElementById('completeWorkout').style.display = 'block';
+        }
+
+        // Toggle exercise completion
+        window.toggleExercise = function(idx) {
+            const exerciseItem = document.getElementById(`exercise-${idx}`);
+            const checkbox = document.getElementById(`check-${idx}`);
+            
+            if (checkbox.checked) {
+                exerciseItem.classList.add('completed');
+            } else {
+                exerciseItem.classList.remove('completed');
+            }
         }
 
         // Generate progression suggestion
@@ -1333,9 +1533,26 @@
 
         // Update today's reading assignment
         function updateTodayReading() {
+            console.log('updateTodayReading called');
             const today = new Date().getDay(); // 0=Sun, 1=Mon, 2=Tue, etc.
             const container = document.getElementById('todayReading');
             const btn = document.getElementById('completeReading');
+            
+            console.log('Container:', container);
+            console.log('Button:', btn);
+            console.log('bibleReadingPlan exists:', typeof bibleReadingPlan !== 'undefined');
+            console.log('readingData:', readingData);
+            
+            if (!container || !btn) {
+                console.error('Reading elements not found');
+                return;
+            }
+            
+            if (typeof bibleReadingPlan === 'undefined' || !bibleReadingPlan.mwf || !bibleReadingPlan.tth) {
+                console.error('Reading plan not loaded:', bibleReadingPlan);
+                container.innerHTML = '<div class="no-data">Reading plan not loaded - check console</div>';
+                return;
+            }
             
             let assignment = '';
             let canComplete = false;
@@ -1352,6 +1569,7 @@
             
             if (today === 1 || today === 3 || today === 5) { // Mon/Wed/Fri
                 const reading = bibleReadingPlan.mwf[readingData.mwfIndex];
+                console.log('Mon/Wed/Fri reading:', reading);
                 if (reading) {
                     assignment = `<strong>Old Testament:</strong><br>${reading.book} ${reading.chapters.join(', ')}`;
                     canComplete = true;
@@ -1360,6 +1578,7 @@
                 }
             } else if (today === 2 || today === 4) { // Tue/Thu
                 const reading = bibleReadingPlan.tth[readingData.tthIndex];
+                console.log('Tue/Thu reading:', reading);
                 if (reading) {
                     assignment = '<strong>New Testament:</strong><br>';
                     
@@ -1382,6 +1601,7 @@
                 assignment = '<div style="color: var(--text-dim);">Rest day - No reading scheduled for weekends</div>';
             }
             
+            console.log('Final assignment:', assignment);
             container.innerHTML = assignment || '<div class="no-data">Reading plan complete!</div>';
             btn.style.display = canComplete ? 'block' : 'none';
         }
@@ -1390,19 +1610,23 @@
         document.getElementById('completeReading').addEventListener('click', () => {
             const today = new Date().getDay();
             let stream = '';
+            let historyEntry = {
+                date: new Date().toISOString()
+            };
             
             if (today === 1 || today === 3 || today === 5) {
                 stream = 'mwf';
+                historyEntry.stream = stream;
+                historyEntry.mwfIndex = readingData.mwfIndex;
                 readingData.mwfIndex++;
             } else if (today === 2 || today === 4) {
                 stream = 'tth';
+                historyEntry.stream = stream;
+                historyEntry.tthIndex = readingData.tthIndex;
                 readingData.tthIndex++;
             }
             
-            readingData.history.push({
-                date: new Date().toISOString(),
-                stream: stream
-            });
+            readingData.history.push(historyEntry);
             
             saveData();
             updateTodayReading();
@@ -1412,6 +1636,8 @@
             
             alert('📖 Reading complete! Keep growing in the Word!');
         });
+
+        // Next reading (skip ahead without marking today complete)
 
         // Update reading progress bars
         function updateReadingProgress() {
@@ -1481,14 +1707,6 @@
 
             // Total workouts
             document.getElementById('totalWorkouts').textContent = workoutData.history.length;
-
-            // Workout weeks
-            const workoutWeeks = calculateWorkoutWeeks();
-            document.getElementById('workoutWeeks').textContent = workoutWeeks;
-            
-            // Reading weeks
-            const readingWeeks = calculateReadingWeeks();
-            document.getElementById('readingWeeks').textContent = readingWeeks;
         }
 
         function calculateWorkoutWeeks() {
@@ -1548,6 +1766,25 @@
         }
 
         // Render calendar (weekly view)
+        // Bible book abbreviations
+        const bibleAbbreviations = {
+            'Genesis': 'Gen', 'Exodus': 'Exod', 'Leviticus': 'Lev', 'Numbers': 'Num', 'Deuteronomy': 'Deut',
+            'Joshua': 'Josh', 'Judges': 'Judg', 'Ruth': 'Ruth', '1 Samuel': '1 Sam', '2 Samuel': '2 Sam',
+            '1 Kings': '1 Kgs', '2 Kings': '2 Kgs', '1 Chronicles': '1 Chr', '2 Chronicles': '2 Chr',
+            'Ezra': 'Ezra', 'Nehemiah': 'Neh', 'Esther': 'Esth', 'Job': 'Job', 'Psalms': 'Ps',
+            'Proverbs': 'Prov', 'Ecclesiastes': 'Eccl', 'Song of Solomon': 'Song', 'Isaiah': 'Isa',
+            'Jeremiah': 'Jer', 'Lamentations': 'Lam', 'Ezekiel': 'Ezek', 'Daniel': 'Dan', 'Hosea': 'Hos',
+            'Joel': 'Joel', 'Amos': 'Amos', 'Obadiah': 'Obad', 'Jonah': 'Jonah', 'Micah': 'Mic',
+            'Nahum': 'Nah', 'Habakkuk': 'Hab', 'Zephaniah': 'Zeph', 'Haggai': 'Hag', 'Zechariah': 'Zech',
+            'Malachi': 'Mal', 'Matthew': 'Matt', 'Mark': 'Mark', 'Luke': 'Luke', 'John': 'John',
+            'Acts': 'Acts', 'Romans': 'Rom', '1 Corinthians': '1 Cor', '2 Corinthians': '2 Cor',
+            'Galatians': 'Gal', 'Ephesians': 'Eph', 'Philippians': 'Phil', 'Colossians': 'Col',
+            '1 Thessalonians': '1 Thess', '2 Thessalonians': '2 Thess', '1 Timothy': '1 Tim',
+            '2 Timothy': '2 Tim', 'Titus': 'Titus', 'Philemon': 'Phlm', 'Hebrews': 'Heb',
+            'James': 'Jas', '1 Peter': '1 Pet', '2 Peter': '2 Pet', '1 John': '1 John',
+            '2 John': '2 John', '3 John': '3 John', 'Jude': 'Jude', 'Revelation': 'Rev'
+        };
+
         function renderCalendar() {
             const cal = document.getElementById('calendarView');
             const now = new Date();
@@ -1557,13 +1794,8 @@
             weekStart.setDate(now.getDate() - now.getDay());
             weekStart.setHours(0, 0, 0, 0);
 
-            const workoutDates = (workoutData.history || []).map(w => 
-                new Date(w.date).toDateString()
-            );
-            
-            const readingDates = (readingData.history || []).map(r => 
-                new Date(r.date).toDateString()
-            );
+            const workoutHistory = workoutData.history || [];
+            const readingHistory = readingData.history || [];
 
             const days = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
             let html = '';
@@ -1574,24 +1806,87 @@
                 date.setDate(weekStart.getDate() + i);
                 const dateStr = date.toDateString();
                 const dayNum = date.getDate();
-                const hasWorkout = workoutDates.includes(dateStr);
-                const hasReading = readingDates.includes(dateStr);
                 const isToday = dateStr === now.toDateString();
+                
+                // Find workout for this day
+                const workout = workoutHistory.find(w => new Date(w.date).toDateString() === dateStr);
+                
+                // Find reading for this day
+                const reading = readingHistory.find(r => new Date(r.date).toDateString() === dateStr);
                 
                 let classes = 'calendar-day';
                 if (isToday) classes += ' today';
-                if (hasWorkout && hasReading) {
-                    classes += ' both';
-                } else if (hasWorkout) {
-                    classes += ' workout';
-                } else if (hasReading) {
-                    classes += ' reading';
+                
+                let pillsHtml = '';
+                
+                // Workout pill
+                if (workout) {
+                    const workoutLabel = workout.type === 'push' ? 'Push' 
+                        : workout.type === 'pull' ? 'Pull' 
+                        : 'Legs';
+                    
+                    pillsHtml += `
+                        <div class="activity-pill workout-pill" title="${workoutLabel} workout">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M20.57 14.86L22 13.43L20.57 12L17 15.57L8.43 7L12 3.43L10.57 2L9.14 3.43L7.71 2L5.57 4.14L4.14 2.71L2.71 4.14L4.14 5.57L2 7.71L3.43 9.14L2 10.57L3.43 12L7 8.43L15.57 17L12 20.57L13.43 22L14.86 20.57L16.29 22L18.43 19.86L19.86 21.29L21.29 19.86L19.86 18.43L22 16.29L20.57 14.86Z" />
+                            </svg>
+                            <span>${workoutLabel}</span>
+                        </div>
+                    `;
+                }
+                
+                // Reading pill
+                if (reading) {
+                    let readingText = '';
+                    const dayOfWeek = date.getDay();
+                    
+                    if (dayOfWeek === 1 || dayOfWeek === 3 || dayOfWeek === 5) { // Mon/Wed/Fri
+                        const idx = reading.mwfIndex !== undefined ? reading.mwfIndex : readingData.mwfIndex;
+                        const assignment = bibleReadingPlan.mwf[idx];
+                        if (assignment) {
+                            const abbrev = bibleAbbreviations[assignment.book] || assignment.book;
+                            readingText = `${abbrev} ${assignment.chapters.join(',')}`;
+                        }
+                    } else if (dayOfWeek === 2 || dayOfWeek === 4) { // Tue/Thu
+                        const idx = reading.tthIndex !== undefined ? reading.tthIndex : readingData.tthIndex;
+                        const assignment = bibleReadingPlan.tth[idx];
+                        if (assignment) {
+                            const parts = [];
+                            if (assignment.epistle) {
+                                const abbrev = bibleAbbreviations[assignment.epistle] || assignment.epistle;
+                                parts.push(`${abbrev} ${assignment.epistleChapter}`);
+                            }
+                            if (assignment.gospel) {
+                                const abbrev = bibleAbbreviations[assignment.gospel] || assignment.gospel;
+                                parts.push(`${abbrev} ${assignment.gospelChapter}`);
+                            }
+                            readingText = parts.join(' & ');
+                        }
+                    }
+                    
+                    if (readingText) {
+                        pillsHtml += `
+                            <div class="activity-pill reading-pill" title="${readingText}">
+                                <svg width="14" height="14" viewBox="0 -960 960 960" fill="currentColor">
+                                    <path d="M440-278v-394q-41-24-87-36t-93-12q-36 0-71.5 7T120-692v396q35-12 69.5-18t70.5-6q47 0 91.5 10.5T440-278Zm40 118q-48-38-104-59t-116-21q-42 0-82.5 11T100-198q-21 11-40.5-1T40-234v-482q0-11 5.5-21T62-752q46-24 96-36t102-12q74 0 126 17t112 52q11 6 16.5 14t5.5 21v418q44-21 88.5-31.5T700-320q36 0 70.5 6t69.5 18v-481q15 5 29.5 11t28.5 14q11 5 16.5 15t5.5 21v482q0 23-19.5 35t-40.5 1q-37-20-77.5-31T700-240q-60 0-116 21t-104 59Zm140-240v-440l120-40v440l-120 40Zm-340-99Z"/>
+                                </svg>
+                                <span>${readingText}</span>
+                            </div>
+                        `;
+                    }
                 }
                 
                 html += `
                     <div class="${classes}">
-                        <div class="day-name">${days[i]}</div>
-                        <div class="day-number">${dayNum}</div>
+                        <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+                            <div style="display: flex; flex-direction: column;">
+                                <div class="day-name">${days[i]}</div>
+                                <div class="day-number">${dayNum}</div>
+                            </div>
+                            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; justify-content: flex-end;">
+                                ${pillsHtml}
+                            </div>
+                        </div>
                     </div>
                 `;
             }
@@ -1653,7 +1948,19 @@
         }
 
         // Initialize
-        initStorage();
-    </script>
+        async function init() {
+            await initStorage();
+            renderCalendar();
+        }
+        
+        init();
+    
+        // ---- PWA: Service Worker registration ----
+        if ("serviceWorker" in navigator) {
+            window.addEventListener("load", () => {
+                navigator.serviceWorker.register("./service-worker.js").catch(console.error);
+            });
+        }
+</script>
 </body>
 </html>
