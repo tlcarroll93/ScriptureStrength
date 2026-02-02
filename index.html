@@ -807,7 +807,7 @@
             <div style="display: grid; gap: 2rem;">
                 <!-- Today's Reading -->
                 <div class="chart-container">
-                    <div class="chart-title">Today's Reading Assignment</div>
+                    <div class="chart-title">Next Reading</div>
                     <div id="todayReading" style="font-size: 1.1rem; line-height: 1.8; color: var(--text);">
                         <div class="no-data">Loading reading plan...</div>
                     </div>
@@ -1534,7 +1534,6 @@
         // Update today's reading assignment
         function updateTodayReading() {
             console.log('updateTodayReading called');
-            const today = new Date().getDay(); // 0=Sun, 1=Mon, 2=Tue, etc.
             const container = document.getElementById('todayReading');
             const btn = document.getElementById('completeReading');
             
@@ -1557,30 +1556,43 @@
             let assignment = '';
             let canComplete = false;
             
-            // Check if already completed today
-            const todayStr = new Date().toDateString();
-            const completedToday = readingData.history.some(r => new Date(r.date).toDateString() === todayStr);
+            // Determine which stream is next based on alternating pattern
+            // Start with OT, then NT, then OT, etc.
+            const totalCompleted = readingData.history.length;
+            const isOTNext = totalCompleted % 2 === 0; // Even number = OT, Odd = NT
             
-            if (completedToday) {
-                container.innerHTML = '<div style="color: var(--success); font-weight: 600;">✓ Today\'s reading completed!</div>';
-                btn.style.display = 'none';
-                return;
-            }
-            
-            if (today === 1 || today === 3 || today === 5) { // Mon/Wed/Fri
+            if (isOTNext) {
+                // Show next Old Testament reading
                 const reading = bibleReadingPlan.mwf[readingData.mwfIndex];
-                console.log('Mon/Wed/Fri reading:', reading);
+                console.log('Next OT reading:', reading);
                 if (reading) {
-                    assignment = `<strong>Old Testament:</strong><br>${reading.book} ${reading.chapters.join(', ')}`;
+                    assignment = `<strong>Old Testament (Mon/Wed/Fri stream):</strong><br>${reading.book} ${reading.chapters.join(', ')}`;
                     canComplete = true;
                 } else {
-                    assignment = '<div style="color: var(--success);">🎉 Old Testament complete!</div>';
+                    // OT complete, check NT
+                    const ntReading = bibleReadingPlan.tth[readingData.tthIndex];
+                    if (ntReading) {
+                        assignment = '<div style="color: var(--success);">🎉 Old Testament complete!</div>';
+                        assignment += '<div style="margin-top: 1rem;"><strong>New Testament (Tue/Thu stream):</strong><br>';
+                        if (ntReading.epistle) {
+                            assignment += `${ntReading.epistle} ${ntReading.epistleChapter}`;
+                        }
+                        if (ntReading.gospel) {
+                            if (ntReading.epistle) assignment += '<br>';
+                            assignment += `${ntReading.gospel} ${ntReading.gospelChapter}`;
+                        }
+                        assignment += '</div>';
+                        canComplete = true;
+                    } else {
+                        assignment = '<div style="color: var(--success);">🎉 Entire Bible reading plan complete!</div>';
+                    }
                 }
-            } else if (today === 2 || today === 4) { // Tue/Thu
+            } else {
+                // Show next New Testament reading
                 const reading = bibleReadingPlan.tth[readingData.tthIndex];
-                console.log('Tue/Thu reading:', reading);
+                console.log('Next NT reading:', reading);
                 if (reading) {
-                    assignment = '<strong>New Testament:</strong><br>';
+                    assignment = '<strong>New Testament (Tue/Thu stream):</strong><br>';
                     
                     // Epistle
                     if (reading.epistle) {
@@ -1595,10 +1607,16 @@
                     
                     canComplete = true;
                 } else {
-                    assignment = '<div style="color: var(--success);">🎉 New Testament complete!</div>';
+                    // NT complete, check OT
+                    const otReading = bibleReadingPlan.mwf[readingData.mwfIndex];
+                    if (otReading) {
+                        assignment = '<div style="color: var(--success);">🎉 New Testament complete!</div>';
+                        assignment += `<div style="margin-top: 1rem;"><strong>Old Testament (Mon/Wed/Fri stream):</strong><br>${otReading.book} ${otReading.chapters.join(', ')}</div>`;
+                        canComplete = true;
+                    } else {
+                        assignment = '<div style="color: var(--success);">🎉 Entire Bible reading plan complete!</div>';
+                    }
                 }
-            } else { // Weekend
-                assignment = '<div style="color: var(--text-dim);">Rest day - No reading scheduled for weekends</div>';
             }
             
             console.log('Final assignment:', assignment);
@@ -1608,18 +1626,20 @@
 
         // Complete reading
         document.getElementById('completeReading').addEventListener('click', () => {
-            const today = new Date().getDay();
+            const totalCompleted = readingData.history.length;
+            const isOTNext = totalCompleted % 2 === 0; // Even = OT, Odd = NT
+            
             let stream = '';
             let historyEntry = {
                 date: new Date().toISOString()
             };
             
-            if (today === 1 || today === 3 || today === 5) {
+            if (isOTNext) {
                 stream = 'mwf';
                 historyEntry.stream = stream;
                 historyEntry.mwfIndex = readingData.mwfIndex;
                 readingData.mwfIndex++;
-            } else if (today === 2 || today === 4) {
+            } else {
                 stream = 'tth';
                 historyEntry.stream = stream;
                 historyEntry.tthIndex = readingData.tthIndex;
